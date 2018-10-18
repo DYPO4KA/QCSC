@@ -1,4 +1,4 @@
-# QCSC
+# QCSC AHK Script
 
 Quake Champions Sensitivity Changer per weapon
 
