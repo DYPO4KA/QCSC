@@ -1,0 +1,128 @@
+;/ ----------------------------------------------------------------------------
+; Script Version: 0.4590
+; Author: VÃW3ßV
+; Script Function: Changing Sensitivity per Weapon
+;/ ----------------------------------------------------------------------------
+#NoEnv
+#Persistent
+#SingleInstance, force
+SetBatchLines -1
+IniFile = SensA.ini
+;========================================================
+Menu, Tray, NoStandard
+Menu, Tray, Add, Change SHAFT bind, shaftkey
+Menu, Tray, Add, Change RL bind, rlkey
+Menu, Tray, Add, Change RAIL bind, railkey
+Menu, Tray, Add, Change Def bind, defkey
+Menu, Tray, Add
+Menu, Tray, Add, Change SHAFT sens, shaft
+Menu, Tray, Add, Change RL sens, rl
+Menu, Tray, Add, Change RAIL sens, rail
+Menu, Tray, Add, Exit, ExitApp
+GoTo, INIREAD
+;----------------------------------
+shaftkey:
+InputBox, UserKeySh, SHAFT KEY BIND, , , 64, 100
+IniWrite, %UserKeySh%, %IniFile%, USER KEY BIND, Shaft key
+return
+
+rlkey:
+InputBox, UserKeyRL, RL KEY BIND, , , 64, 100
+IniWrite, %UserKeyRL%, %IniFile%, USER KEY BIND, RL key
+return
+
+railkey:
+InputBox, UserKeyR, RAIL KEY BIND, , , 64, 100
+IniWrite, %UserKeyR%, %IniFile%, USER KEY BIND, Rail key
+return
+
+defkey:
+InputBox, UserDef, DEF KEY BIND, , , 64, 100
+IniWrite, %UserDef%, %IniFile%, USER KEY BIND, Reset to defaults key
+return
+;----------------------------------
+shaft:
+InputBox, prefix, SHAFT Sens, , , 64, 100
+IniWrite, %prefix%, %IniFile%, SHAFT Sens, Value
+return
+
+rl:
+InputBox, suffix, RL Sens, , , 64, 100
+IniWrite, %suffix%, %IniFile%, RL Sens, Value
+return
+
+rail:
+InputBox, asffix, RAIL Sens, , , 64, 100
+IniWrite, %asffix%, %IniFile%, RAIL Sens, Value
+return
+;========================================================
+INIREAD:
+IniRead, UserKeySh, %IniFile%, USER KEY BIND, Shaft key
+IniRead, UserKeyRL, %IniFile%, USER KEY BIND, RL key
+IniRead, UserKeyR, %IniFile%, USER KEY BIND, Rail key
+IniRead, UserDef, %IniFile%, USER KEY BIND, Reset to defaults key
+HotKey, ~%UserKeySh%, _UserKeySh
+HotKey, ~%UserKeyRL%, _UserKeyRL
+HotKey, ~%UserKeyR%, _UserKeyR
+HotKey, ~%UserDef%, _UserDef
+IniRead, prefix, %IniFile%, SHAFT Sens, Value
+IniRead, suffix, %IniFile%, RL Sens, Value
+IniRead, asffix, %IniFile%, RAIL Sens, Value
+GoTo, SCRIPT
+;======================SCRIPT============================
+; Usage: SensMode(1,[speed]) = on  (speed optional: 1-20 range, default is 2)
+;        SensMode(0)         = off
+
+SCRIPT:
+SPI_GETMOUSESPEED   := 0x70
+DllCall("SystemParametersInfo", UInt,SPI_GETMOUSESPEED, UInt,0, UIntP,prevSpeed, UInt,0)
+;#IfWinActive dfengine 1.08m
+PToggle := !PToggle
+_UserDef:					;Q defaults
+	If (!PToggle)
+		SensMode(0)
+	Else
+		SensMode(1, prevSpeed)
+return
+_UserKeySh:					;6
+	If (!PToggle)
+		SensMode(0)
+	Else
+		SensMode(1, prefix)
+return
+
+_UserKeyRL:					;5
+	If (!PToggle)
+		SensMode(0)
+	Else
+		SensMode(1, suffix)
+return
+
+_UserKeyR:					;R
+	If (!PToggle)
+		SensMode(0)
+	Else
+		SensMode(1, asffix)
+return
+;======================FUNCTION==========================
+SensMode(m, s:=2)
+{
+   static b := 0, c := DllCall("SystemParametersInfo", UInt, 0x70, UInt, 0, UIntP, b, UInt, 0)
+   DllCall("SystemParametersInfo", UInt, 0x71, UInt, 0, Ptr, m ? (s>0 && s<=20 ? s : 2) : b, UInt, 0)
+}
+
+MButton:
+Suspend
+if(%A_IsSuspended% = 0)
+{
+	ToolTip, 
+	BotEnabled = 1
+	} else {
+	ToolTip, 
+	BotEnabled = 0
+	
+}
+
+ExitApp:
+	ExitApp
+	
